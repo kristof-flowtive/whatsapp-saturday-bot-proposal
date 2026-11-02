@@ -512,39 +512,48 @@
     </div>
   </section>
 
-  <!-- Similar work -->
+  <!-- Worked examples -->
   <section class="border-t border-white/5 py-20 md:py-28">
     <div class="max-w-6xl mx-auto px-6">
       <div class="max-w-3xl mb-12">
-        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">07 — Similar work</div>
-        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">The same pattern, already shipped</h2>
+        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">07 — The same pattern, elsewhere</div>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">Two worked examples of this architecture</h2>
+        <p class="mt-5 text-slate-400 text-lg">
+          Illustrative scenarios, not client case studies. They show how the same building blocks, a channel trigger,
+          Make in the middle, Claude with cached context, and an owner-editable sheet, bend to different businesses.
+        </p>
       </div>
       <div class="grid md:grid-cols-2 gap-6">
         <div class="bg-ink-800 border border-white/10 rounded-2xl p-7">
-          <div class="text-xs font-mono text-accent-400 mb-3">MAKE · AIRTABLE · CLAUDE API</div>
-          <h3 class="text-lg font-semibold mb-3">Pricing and deal-logging app for a coin &amp; bullion dealer</h3>
+          <div class="text-xs font-mono text-accent-400 mb-3">WORKED EXAMPLE · DENTAL CLINIC</div>
+          <h3 class="text-lg font-semibold mb-3">After-hours WhatsApp triage with next-morning handover</h3>
           <p class="text-sm text-slate-400 leading-relaxed mb-4">
-            Make handles every external API call. All business settings (margins, item categories, rep list) sit in Airtable
-            so the owner changes them without touching a scenario. Delivered with a Loom walkthrough of every editable
-            setting, the same handover format you're asking for.
+            Patients message outside opening hours. respond.io checks the time window, Make pulls the thread and
+            the clinic's FAQ document from a shared drive, Claude answers routine questions (hours, parking, what to
+            bring) and flags anything that sounds urgent. Every conversation is tagged by urgency and assigned to the
+            front desk, who open a prioritised queue at 8am. The practice manager controls the hours window,
+            escalation keywords and the assignee from a Google Sheet.
           </p>
           <div class="flex flex-wrap gap-2 text-xs">
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Owner-editable config</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Fallback paths</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Video handover</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Time-window gate</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Urgency tagging</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Sheet-driven settings</span>
           </div>
         </div>
-        <!-- PLACEHOLDER: replace with a real respond.io / WhatsApp example, or delete this card -->
-        <div class="bg-ink-800 border-2 border-dashed border-amber-400/50 rounded-2xl p-7">
-          <div class="text-xs font-mono text-amber-300 mb-3">PLACEHOLDER — REPLACE BEFORE SENDING</div>
-          <h3 class="text-lg font-semibold mb-3">Your respond.io / WhatsApp example goes here</h3>
+        <div class="bg-ink-800 border border-white/10 rounded-2xl p-7">
+          <div class="text-xs font-mono text-accent-400 mb-3">WORKED EXAMPLE · PROPERTY AGENCY</div>
+          <h3 class="text-lg font-semibold mb-3">Weekend viewing enquiries, drafted for agents to approve</h3>
           <p class="text-sm text-slate-400 leading-relaxed mb-4">
-            The brief asks for one. Add a one-paragraph description, what it integrated with, and a screenshot or link.
-            If you don't have one yet, delete this card and keep the one on the left.
+            Listing enquiries spike on Saturdays and Sundays while agents are out on viewings. Make batches each
+            burst of messages, fetches the listing sheet so Claude knows price, size and availability, and drafts a
+            reply as an internal note rather than sending it. The agent on duty reads the draft on their phone, taps
+            send or edits it. A reply cap and a per-agent rota live in the same sheet, so the office manager can
+            reassign weekends without touching the automation.
           </p>
           <div class="flex flex-wrap gap-2 text-xs">
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">respond.io</span>
-            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">WhatsApp</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Draft-only mode</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Message batching</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Rota from a sheet</span>
           </div>
         </div>
       </div>
