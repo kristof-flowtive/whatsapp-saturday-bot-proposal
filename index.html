@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Proposal — Saturday WhatsApp Assistant (respond.io + Claude)</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+            mono: ['JetBrains Mono', 'ui-monospace', 'monospace'],
+          },
+          colors: {
+            ink: { 900: '#0B0F17', 800: '#121826', 700: '#1B2332', 600: '#2A3447' },
+            accent: { 400: '#4ADE80', 500: '#22C55E', 600: '#16A34A' }
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { font-family: 'Inter', sans-serif; -webkit-font-smoothing: antialiased; }
+    .grid-bg {
+      background-image:
+        linear-gradient(rgba(255,255,255,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,0.04) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+    .glow { background: radial-gradient(circle at 50% 0%, rgba(34, 197, 94, 0.14), transparent 60%); }
+    .pulse { animation: pulse 2.4s ease-in-out infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 0.4; } 50% { opacity: 1; } }
+    .step-line::before {
+      content: ''; position: absolute; left: 19px; top: 40px; bottom: -20px; width: 2px;
+      background: linear-gradient(to bottom, #22C55E, transparent);
+    }
+    .step-line:last-child::before { display: none; }
+    .flow-arrow { width: 2px; height: 28px; margin: 0 auto; background: linear-gradient(to bottom, rgba(74,222,128,0.6), rgba(74,222,128,0.15)); }
+    .sheet-row:nth-child(even) { background: rgba(255,255,255,0.02); }
+  </style>
+</head>
+<body class="bg-ink-900 text-slate-100">
+
+  <!-- Top bar -->
+  <header class="border-b border-white/5 sticky top-0 z-40 bg-ink-900/80 backdrop-blur-md">
+    <div class="max-w-6xl mx-auto px-6 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-2">
+        <div class="w-8 h-8 rounded-lg bg-gradient-to-br from-accent-400 to-accent-600 flex items-center justify-center">
+          <svg class="w-4 h-4 text-ink-900" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+          </svg>
+        </div>
+        <span class="font-semibold tracking-tight">Flowtive</span>
+      </div>
+      <nav class="hidden md:flex items-center gap-7 text-sm text-slate-400">
+        <a href="#understanding" class="hover:text-white transition">Understanding</a>
+        <a href="#flow" class="hover:text-white transition">Message Flow</a>
+        <a href="#controls" class="hover:text-white transition">Owner Controls</a>
+        <a href="#milestones" class="hover:text-white transition">Milestones</a>
+        <a href="#pricing" class="hover:text-white transition">Pricing</a>
+      </nav>
+      <a href="#contact" class="text-sm bg-white text-ink-900 px-4 py-2 rounded-lg font-medium hover:bg-accent-400 transition">Get in touch</a>
+    </div>
+  </header>
+
+  <!-- Hero -->
+  <section class="relative overflow-hidden">
+    <div class="absolute inset-0 grid-bg opacity-50"></div>
+    <div class="absolute inset-0 glow"></div>
+    <div class="relative max-w-6xl mx-auto px-6 pt-20 pb-24 md:pt-28 md:pb-32">
+      <div class="inline-flex items-center gap-2 bg-white/5 border border-white/10 rounded-full px-3 py-1 text-xs text-slate-300 mb-6">
+        <span class="w-1.5 h-1.5 rounded-full bg-accent-400 pulse"></span>
+        Project Proposal · Prepared for your home-improvement team
+      </div>
+      <h1 class="text-4xl md:text-6xl font-bold tracking-tight leading-[1.05] max-w-4xl">
+        A Claude assistant that answers your WhatsApp leads <span class="text-accent-400">every Saturday</span>, then hands them to your team.
+      </h1>
+      <p class="mt-6 text-lg md:text-xl text-slate-400 max-w-2xl leading-relaxed">
+        Built inside your respond.io, Make and Anthropic accounts. One reply per customer burst, draft / live / off
+        switch, and every setting editable by the owner in a Google Sheet, without ever opening Make.
+      </p>
+      <div class="mt-10 flex flex-wrap gap-3">
+        <a href="#flow" class="bg-accent-500 hover:bg-accent-400 text-ink-900 font-semibold px-5 py-3 rounded-lg transition">See the message flow</a>
+        <a href="#pricing" class="border border-white/15 hover:bg-white/5 px-5 py-3 rounded-lg transition">View fixed-price bid</a>
+      </div>
+
+      <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+          <div class="text-2xl font-bold text-accent-400">Sat only</div>
+          <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Singapore time</div>
+        </div>
+        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+          <div class="text-2xl font-bold text-accent-400">2 weeks</div>
+          <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">To go-live</div>
+        </div>
+        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+          <div class="text-2xl font-bold text-accent-400">3 modes</div>
+          <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Draft · live · off</div>
+        </div>
+        <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+          <div class="text-2xl font-bold text-accent-400">$800</div>
+          <div class="text-xs text-slate-400 mt-1 uppercase tracking-wide">Fixed · 3 milestones</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Understanding -->
+  <section id="understanding" class="border-t border-white/5 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-5 gap-12">
+        <div class="md:col-span-2">
+          <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">01 — Understanding</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight">What you're solving for</h2>
+          <p class="mt-5 text-slate-400 leading-relaxed">
+            Saturday enquiries land in respond.io when nobody is at a desk. By Monday the lead has cooled or gone
+            to a competitor. You want a first response within minutes, in your voice, without handing control of
+            the conversation to a bot for good.
+          </p>
+        </div>
+        <div class="md:col-span-3 grid sm:grid-cols-2 gap-4">
+          <div class="bg-ink-800 border border-white/10 rounded-xl p-5">
+            <div class="text-accent-400 font-mono text-xs mb-2">REQUIREMENT</div>
+            <div class="font-semibold mb-1">Saturdays only, SGT</div>
+            <p class="text-sm text-slate-400">The bot is silent six days a week. respond.io's Date &amp; Time step decides, so the rule lives where your team can see it.</p>
+          </div>
+          <div class="bg-ink-800 border border-white/10 rounded-xl p-5">
+            <div class="text-accent-400 font-mono text-xs mb-2">REQUIREMENT</div>
+            <div class="font-semibold mb-1">Owner-editable, no Make</div>
+            <p class="text-sm text-slate-400">Mode, assignee, reply cap and the full bot instructions sit in a Google Sheet. Knowledge files sit in a SharePoint folder.</p>
+          </div>
+          <div class="bg-ink-800 border border-white/10 rounded-xl p-5">
+            <div class="text-accent-400 font-mono text-xs mb-2">REQUIREMENT</div>
+            <div class="font-semibold mb-1">One reply per burst</div>
+            <p class="text-sm text-slate-400">Customers send four short messages in a row. They should get one considered answer, not four.</p>
+          </div>
+          <div class="bg-ink-800 border border-white/10 rounded-xl p-5">
+            <div class="text-accent-400 font-mono text-xs mb-2">REQUIREMENT</div>
+            <div class="font-semibold mb-1">Clean handover</div>
+            <p class="text-sm text-slate-400">After replying, the bot tags the conversation, assigns it to a named team member and leaves an internal note. Humans take it from there.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Message flow -->
+  <section id="flow" class="border-t border-white/5 py-20 md:py-28 bg-gradient-to-b from-ink-900 to-ink-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-3xl mb-14">
+        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">02 — The build</div>
+        <h2 class="text-3xl md:text-5xl font-bold tracking-tight">Inbound WhatsApp to handover, in one diagram</h2>
+        <p class="mt-5 text-slate-400 text-lg">
+          respond.io decides <em>whether</em> to call the bot. Make decides <em>what</em> the bot does. The Google Sheet decides <em>how</em>.
+        </p>
+      </div>
+
+      <div class="grid lg:grid-cols-3 gap-6">
+        <!-- Column 1: respond.io -->
+        <div class="bg-ink-900/60 border border-white/10 rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-5">
+            <span class="w-2 h-2 rounded-full bg-emerald-400"></span>
+            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">respond.io workflow</span>
+          </div>
+          <div class="space-y-0">
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">TRIGGER</div>
+              <div class="text-sm font-medium">New inbound message</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">DATE &amp; TIME</div>
+              <div class="text-sm font-medium">Is it Saturday in Asia/Singapore?</div>
+              <div class="text-xs text-slate-500 mt-1">No → end. Team handles it as usual.</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">HTTP REQUEST</div>
+              <div class="text-sm font-medium">POST contact ID + conversation ID to Make webhook</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 2: Make -->
+        <div class="bg-ink-900/60 border border-accent-400/30 rounded-2xl p-6 shadow-xl shadow-accent-500/5">
+          <div class="flex items-center gap-2 mb-5">
+            <span class="w-2 h-2 rounded-full bg-accent-400"></span>
+            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Make middleware</span>
+          </div>
+          <div class="space-y-0">
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">1 · BATCH</div>
+              <div class="text-sm font-medium">Queue the message, wait for the burst to end</div>
+              <div class="text-xs text-slate-500 mt-1">Only the last message in a 60–90s window continues.</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">2 · READ SETTINGS</div>
+              <div class="text-sm font-medium">Google Sheet: mode, assignee, reply cap, instructions</div>
+              <div class="text-xs text-slate-500 mt-1">Mode = off → stop. Cap reached → tag &amp; assign only.</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">3 · CONTEXT</div>
+              <div class="text-sm font-medium">respond.io API → conversation history · SharePoint → knowledge files</div>
+            </div>
+            <div class="flow-arrow"></div>
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">4 · CLAUDE</div>
+              <div class="text-sm font-medium">Anthropic API with prompt caching</div>
+              <div class="text-xs text-slate-500 mt-1">Instructions + knowledge cached; only the conversation changes per call.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Column 3: outcome -->
+        <div class="bg-ink-900/60 border border-white/10 rounded-2xl p-6">
+          <div class="flex items-center gap-2 mb-5">
+            <span class="w-2 h-2 rounded-full bg-sky-400"></span>
+            <span class="text-xs uppercase tracking-wider text-slate-400 font-semibold">Back in respond.io</span>
+          </div>
+          <div class="grid grid-cols-1 gap-3">
+            <div class="bg-white/[0.04] border border-amber-400/30 rounded-lg p-4">
+              <div class="text-xs font-mono text-amber-300 mb-1">MODE = DRAFT</div>
+              <div class="text-sm font-medium">Reply posted as an internal comment</div>
+              <div class="text-xs text-slate-500 mt-1">Your team sees what the bot would have said. Customer sees nothing.</div>
+            </div>
+            <div class="bg-white/[0.04] border border-accent-400/30 rounded-lg p-4">
+              <div class="text-xs font-mono text-accent-400 mb-1">MODE = LIVE</div>
+              <div class="text-sm font-medium">Reply sent to the customer on WhatsApp</div>
+            </div>
+            <div class="bg-white/[0.04] border border-white/10 rounded-lg p-4">
+              <div class="text-xs font-mono text-slate-400 mb-1">MODE = OFF</div>
+              <div class="text-sm font-medium">Nothing happens</div>
+            </div>
+            <div class="mt-2 pt-4 border-t border-white/10">
+              <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">Then, in every mode</div>
+              <ul class="space-y-2 text-sm text-slate-300">
+                <li class="flex gap-2"><span class="text-accent-400">✓</span> Tag added, e.g. <span class="font-mono text-xs bg-white/5 px-1.5 py-0.5 rounded">AI-Saturday</span></li>
+                <li class="flex gap-2"><span class="text-accent-400">✓</span> Assigned to the team member named in the sheet</li>
+                <li class="flex gap-2"><span class="text-accent-400">✓</span> Internal comment with a one-line summary</li>
+                <li class="flex gap-2"><span class="text-accent-400">✓</span> Row written to the "Log" tab</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Owner controls -->
+  <section id="controls" class="border-t border-white/5 py-20 md:py-28 bg-ink-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="grid md:grid-cols-5 gap-12 items-start">
+        <div class="md:col-span-2">
+          <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">03 — Owner controls</div>
+          <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-5">Everything she might change lives in one sheet</h2>
+          <p class="text-slate-400 leading-relaxed mb-6">
+            Make reads the sheet at the start of every run, so a change takes effect on the very next message.
+            No redeploy, no login to Make, nothing to break.
+          </p>
+          <ul class="space-y-3 text-sm text-slate-300">
+            <li class="flex gap-3"><span class="text-accent-400 mt-0.5">▸</span><div><span class="font-medium">Settings tab</span> — mode, handover assignee, daily reply cap.</div></li>
+            <li class="flex gap-3"><span class="text-accent-400 mt-0.5">▸</span><div><span class="font-medium">Instructions tab</span> — the full bot prompt in plain English, one cell per section.</div></li>
+            <li class="flex gap-3"><span class="text-accent-400 mt-0.5">▸</span><div><span class="font-medium">Log tab</span> — every bot action with timestamp, contact, mode and outcome.</div></li>
+            <li class="flex gap-3"><span class="text-accent-400 mt-0.5">▸</span><div><span class="font-medium">Errors tab</span> — anything that failed, in plain language, so you can see it without asking me.</div></li>
+            <li class="flex gap-3"><span class="text-accent-400 mt-0.5">▸</span><div><span class="font-medium">SharePoint folder</span> — drop in or edit a knowledge file and the bot reads the new version on its next reply.</div></li>
+          </ul>
+        </div>
+
+        <!-- Sheet mock -->
+        <div class="md:col-span-3">
+          <div class="bg-ink-900 border border-white/10 rounded-2xl overflow-hidden shadow-2xl">
+            <div class="flex items-center gap-2 px-4 py-3 border-b border-white/10 bg-ink-800/60">
+              <span class="w-2.5 h-2.5 rounded-full bg-red-400/70"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-amber-400/70"></span>
+              <span class="w-2.5 h-2.5 rounded-full bg-green-400/70"></span>
+              <span class="ml-3 text-xs text-slate-400 font-mono">Saturday Bot Settings · Google Sheets</span>
+            </div>
+            <div class="flex border-b border-white/10 text-xs">
+              <div class="px-4 py-2 bg-white/5 text-white border-r border-white/10 font-medium">Settings</div>
+              <div class="px-4 py-2 text-slate-500 border-r border-white/10">Instructions</div>
+              <div class="px-4 py-2 text-slate-500 border-r border-white/10">Log</div>
+              <div class="px-4 py-2 text-slate-500">Errors</div>
+            </div>
+            <div class="font-mono text-sm">
+              <div class="grid grid-cols-12 text-xs text-slate-500 border-b border-white/10 px-4 py-2">
+                <div class="col-span-4">A · Setting</div>
+                <div class="col-span-5">B · Value</div>
+                <div class="col-span-3">C · Allowed</div>
+              </div>
+              <div class="sheet-row grid grid-cols-12 px-4 py-3 border-b border-white/5">
+                <div class="col-span-4 text-slate-300">mode</div>
+                <div class="col-span-5"><span class="bg-amber-400/15 text-amber-300 px-2 py-0.5 rounded">draft</span></div>
+                <div class="col-span-3 text-slate-500 text-xs">draft · live · off</div>
+              </div>
+              <div class="sheet-row grid grid-cols-12 px-4 py-3 border-b border-white/5">
+                <div class="col-span-4 text-slate-300">handover_assignee</div>
+                <div class="col-span-5 text-white">sales@yourcompany.sg</div>
+                <div class="col-span-3 text-slate-500 text-xs">respond.io user</div>
+              </div>
+              <div class="sheet-row grid grid-cols-12 px-4 py-3 border-b border-white/5">
+                <div class="col-span-4 text-slate-300">reply_cap_per_day</div>
+                <div class="col-span-5 text-white">40</div>
+                <div class="col-span-3 text-slate-500 text-xs">number</div>
+              </div>
+              <div class="sheet-row grid grid-cols-12 px-4 py-3 border-b border-white/5">
+                <div class="col-span-4 text-slate-300">batch_wait_seconds</div>
+                <div class="col-span-5 text-white">75</div>
+                <div class="col-span-3 text-slate-500 text-xs">30–180</div>
+              </div>
+              <div class="sheet-row grid grid-cols-12 px-4 py-3 border-b border-white/5">
+                <div class="col-span-4 text-slate-300">handover_tag</div>
+                <div class="col-span-5 text-white">AI-Saturday</div>
+                <div class="col-span-3 text-slate-500 text-xs">text</div>
+              </div>
+              <div class="sheet-row grid grid-cols-12 px-4 py-3">
+                <div class="col-span-4 text-slate-300">knowledge_folder</div>
+                <div class="col-span-5 text-white truncate">/Shared/WhatsApp Bot/</div>
+                <div class="col-span-3 text-slate-500 text-xs">SharePoint path</div>
+              </div>
+            </div>
+          </div>
+          <p class="mt-4 text-xs text-slate-500">
+            Illustrative. Column C is a dropdown so invalid values can't be typed. Prefer SharePoint for settings too? Same design, different file.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Reliability -->
+  <section class="border-t border-white/5 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-3xl mb-14">
+        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">04 — Reliability</div>
+        <h2 class="text-3xl md:text-5xl font-bold tracking-tight">Built so no lead is dropped silently</h2>
+      </div>
+      <div class="grid md:grid-cols-3 gap-5">
+        <div class="bg-ink-800 border border-white/10 rounded-xl p-6">
+          <div class="w-9 h-9 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center mb-4 font-mono text-sm">01</div>
+          <h3 class="font-semibold mb-2">Fails to a human, never to silence</h3>
+          <p class="text-sm text-slate-400">If Claude, SharePoint or the respond.io API errors, the conversation is still tagged and assigned, with a comment saying the bot couldn't answer.</p>
+        </div>
+        <div class="bg-ink-800 border border-white/10 rounded-xl p-6">
+          <div class="w-9 h-9 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center mb-4 font-mono text-sm">02</div>
+          <h3 class="font-semibold mb-2">Reply cap as a safety valve</h3>
+          <p class="text-sm text-slate-400">A daily cap in the sheet stops runaway cost or a loop. Once hit, the bot goes handover-only for the rest of the day.</p>
+        </div>
+        <div class="bg-ink-800 border border-white/10 rounded-xl p-6">
+          <div class="w-9 h-9 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center mb-4 font-mono text-sm">03</div>
+          <h3 class="font-semibold mb-2">No double replies</h3>
+          <p class="text-sm text-slate-400">A per-conversation lock in Make's data store means two messages seconds apart can't trigger two Claude calls.</p>
+        </div>
+        <div class="bg-ink-800 border border-white/10 rounded-xl p-6">
+          <div class="w-9 h-9 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center mb-4 font-mono text-sm">04</div>
+          <h3 class="font-semibold mb-2">Prompt caching from day one</h3>
+          <p class="text-sm text-slate-400">Instructions and knowledge files are the cached prefix. Only the conversation varies, so repeat calls pay a fraction of the input price.</p>
+        </div>
+        <div class="bg-ink-800 border border-white/10 rounded-xl p-6">
+          <div class="w-9 h-9 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center mb-4 font-mono text-sm">05</div>
+          <h3 class="font-semibold mb-2">Singapore time, end to end</h3>
+          <p class="text-sm text-slate-400">Saturday is checked in Asia/Singapore in respond.io and re-checked in Make, so a UTC rollover can never fire the bot on a Friday night or Sunday morning.</p>
+        </div>
+        <div class="bg-ink-800 border border-white/10 rounded-xl p-6">
+          <div class="w-9 h-9 rounded-lg bg-accent-500/15 text-accent-400 flex items-center justify-center mb-4 font-mono text-sm">06</div>
+          <h3 class="font-semibold mb-2">Yours, in your accounts</h3>
+          <p class="text-sm text-slate-400">Make scenarios, Anthropic key and respond.io workflow all live under your logins. If we part ways, nothing stops working.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Milestones -->
+  <section id="milestones" class="border-t border-white/5 py-20 md:py-28 bg-ink-800">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-3xl mb-14">
+        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">05 — Milestones</div>
+        <h2 class="text-3xl md:text-5xl font-bold tracking-tight">Your three milestones, two weeks</h2>
+        <p class="mt-5 text-slate-400 text-lg">Each milestone ends with something you can click on in your own accounts.</p>
+      </div>
+
+      <div class="space-y-6">
+        <div class="relative step-line pl-14">
+          <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-accent-500 text-ink-900 font-bold flex items-center justify-center">1</div>
+          <div class="bg-ink-900 border border-white/10 rounded-xl p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <h3 class="text-xl font-semibold">Draft mode working</h3>
+              <span class="text-xs font-mono text-slate-400 bg-white/5 px-2 py-1 rounded">Days 1–5</span>
+            </div>
+            <p class="text-slate-400 mb-4">respond.io workflow live with the Saturday gate. Make scenario reading the sheet, fetching history, pulling SharePoint files, calling Claude, posting the answer as an internal comment and completing the tag-and-assign handover. Batching and the conversation lock in place.</p>
+            <div class="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">You'll see</div>
+            <p class="text-sm text-slate-300">A real WhatsApp test message producing a Claude draft inside respond.io, tagged and assigned to the right person.</p>
+          </div>
+        </div>
+
+        <div class="relative step-line pl-14">
+          <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-accent-500 text-ink-900 font-bold flex items-center justify-center">2</div>
+          <div class="bg-ink-900 border border-white/10 rounded-xl p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <h3 class="text-xl font-semibold">Test cases passed, owner settings demonstrated</h3>
+              <span class="text-xs font-mono text-slate-400 bg-white/5 px-2 py-1 rounded">Days 6–9</span>
+            </div>
+            <p class="text-slate-400 mb-4">Run your test cases plus mine: multi-message bursts, non-Saturday messages, mode = off, reply cap hit, SharePoint file missing, Claude timeout, returning contact with long history. Error paths verified to hand over cleanly.</p>
+            <div class="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">You'll see</div>
+            <p class="text-sm text-slate-300">A screen-share where the owner changes the mode, assignee, cap and an instruction line in the sheet, then watches the next test message obey.</p>
+          </div>
+        </div>
+
+        <div class="relative step-line pl-14">
+          <div class="absolute left-0 top-0 w-10 h-10 rounded-full bg-accent-500 text-ink-900 font-bold flex items-center justify-center">3</div>
+          <div class="bg-ink-900 border border-white/10 rounded-xl p-6">
+            <div class="flex flex-wrap items-center justify-between gap-3 mb-3">
+              <h3 class="text-xl font-semibold">Go-live and handover</h3>
+              <span class="text-xs font-mono text-slate-400 bg-white/5 px-2 py-1 rounded">Days 10–14</span>
+            </div>
+            <p class="text-slate-400 mb-4">Flip to live for the first Saturday with me watching the Log tab in real time. Deliver the 5-minute settings video and the build handover video. One month of bug fixes starts the day you go live.</p>
+            <div class="text-xs uppercase tracking-wider text-slate-500 font-semibold mb-2">You'll see</div>
+            <p class="text-sm text-slate-300">Real customers getting real Saturday replies, and your team picking them up Monday with full context already on the conversation.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Pricing -->
+  <section id="pricing" class="border-t border-white/5 py-20 md:py-28 bg-gradient-to-b from-ink-800 to-ink-900">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-center mb-12">
+        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">06 — Investment</div>
+        <h2 class="text-3xl md:text-5xl font-bold tracking-tight">Fixed-price bid</h2>
+        <p class="mt-5 text-slate-400 text-lg">One number, paid against your three milestones.</p>
+      </div>
+
+      <div class="bg-ink-800 border border-accent-400/30 rounded-2xl overflow-hidden shadow-2xl shadow-accent-500/10">
+        <div class="p-8 md:p-10 border-b border-white/10 text-center">
+          <div class="text-sm text-slate-400 uppercase tracking-wider mb-2">Total project</div>
+          <div class="text-5xl md:text-6xl font-bold tracking-tight">
+            <span class="text-accent-400">$800</span>
+            <span class="text-slate-500 text-2xl font-normal ml-2">USD</span>
+          </div>
+          <div class="text-sm text-slate-400 mt-3">Fixed price · 2 weeks · paid per milestone</div>
+        </div>
+
+        <div class="p-8 md:p-10">
+          <div class="space-y-3">
+            <div class="flex justify-between items-center py-3 border-b border-white/5">
+              <div>
+                <div class="font-medium">M1 — Draft mode working</div>
+                <div class="text-xs text-slate-500">Due when a test message produces a draft in respond.io</div>
+              </div>
+              <div class="font-mono font-semibold">$300</div>
+            </div>
+            <div class="flex justify-between items-center py-3 border-b border-white/5">
+              <div>
+                <div class="font-medium">M2 — Tests passed, settings demo</div>
+                <div class="text-xs text-slate-500">Due on your sign-off of the test run</div>
+              </div>
+              <div class="font-mono font-semibold">$300</div>
+            </div>
+            <div class="flex justify-between items-center py-3">
+              <div>
+                <div class="font-medium">M3 — Go-live, videos, 1 month support</div>
+                <div class="text-xs text-slate-500">Due on the first live Saturday</div>
+              </div>
+              <div class="font-mono font-semibold">$200</div>
+            </div>
+          </div>
+
+          <div class="mt-8 pt-6 border-t border-white/10">
+            <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-3">What's included</div>
+            <div class="grid md:grid-cols-2 gap-2 text-sm text-slate-300">
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> respond.io workflow + Make scenarios</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> Claude integration with prompt caching</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> Google Sheet settings + instructions</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> SharePoint knowledge-file loading</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> Batching, lock, cap, error handling</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> Two videos: settings (5 min) + build handover</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> One month of bug fixes after go-live</div>
+              <div class="flex gap-2"><span class="text-accent-400">✓</span> Built entirely in your accounts</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Running costs -->
+      <div class="mt-10">
+        <div class="text-xs uppercase tracking-wider text-slate-400 font-semibold mb-4 text-center">Running costs after go-live, paid by you to the vendors</div>
+        <div class="grid sm:grid-cols-3 gap-4">
+          <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+            <div class="text-xs text-slate-500 mb-1">Anthropic (Claude Opus 5.5)</div>
+            <div class="font-semibold mb-1">~$0.02–0.05 per reply</div>
+            <p class="text-xs text-slate-400">With caching, a typical Saturday of 30–40 enquiries costs under $2.</p>
+          </div>
+          <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+            <div class="text-xs text-slate-500 mb-1">Make</div>
+            <div class="font-semibold mb-1">~15–25 ops per reply</div>
+            <p class="text-xs text-slate-400">Fits comfortably in the Core plan at Saturday-only volume.</p>
+          </div>
+          <div class="bg-white/[0.03] border border-white/10 rounded-xl p-5">
+            <div class="text-xs text-slate-500 mb-1">respond.io / SharePoint / Sheets</div>
+            <div class="font-semibold mb-1 text-accent-400">$0 added</div>
+            <p class="text-xs text-slate-400">Uses what you already pay for. respond.io plan must include API access.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Similar work -->
+  <section class="border-t border-white/5 py-20 md:py-28">
+    <div class="max-w-6xl mx-auto px-6">
+      <div class="max-w-3xl mb-12">
+        <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">07 — Similar work</div>
+        <h2 class="text-3xl md:text-4xl font-bold tracking-tight">The same pattern, already shipped</h2>
+      </div>
+      <div class="grid md:grid-cols-2 gap-6">
+        <div class="bg-ink-800 border border-white/10 rounded-2xl p-7">
+          <div class="text-xs font-mono text-accent-400 mb-3">MAKE · AIRTABLE · CLAUDE API</div>
+          <h3 class="text-lg font-semibold mb-3">Pricing and deal-logging app for a coin &amp; bullion dealer</h3>
+          <p class="text-sm text-slate-400 leading-relaxed mb-4">
+            Make handles every external API call. All business settings (margins, item categories, rep list) sit in Airtable
+            so the owner changes them without touching a scenario. Delivered with a Loom walkthrough of every editable
+            setting, the same handover format you're asking for.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Owner-editable config</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Fallback paths</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">Video handover</span>
+          </div>
+        </div>
+        <!-- PLACEHOLDER: replace with a real respond.io / WhatsApp example, or delete this card -->
+        <div class="bg-ink-800 border-2 border-dashed border-amber-400/50 rounded-2xl p-7">
+          <div class="text-xs font-mono text-amber-300 mb-3">PLACEHOLDER — REPLACE BEFORE SENDING</div>
+          <h3 class="text-lg font-semibold mb-3">Your respond.io / WhatsApp example goes here</h3>
+          <p class="text-sm text-slate-400 leading-relaxed mb-4">
+            The brief asks for one. Add a one-paragraph description, what it integrated with, and a screenshot or link.
+            If you don't have one yet, delete this card and keep the one on the left.
+          </p>
+          <div class="flex flex-wrap gap-2 text-xs">
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">respond.io</span>
+            <span class="bg-white/5 border border-white/10 px-2 py-1 rounded">WhatsApp</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Questions -->
+  <section class="border-t border-white/5 py-20 md:py-28 bg-ink-800">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">08 — Before kickoff</div>
+      <h2 class="text-3xl md:text-4xl font-bold tracking-tight mb-8">Three things I'll confirm on our first call</h2>
+      <div class="space-y-4">
+        <div class="flex gap-4 bg-ink-900 border border-white/10 rounded-xl p-5">
+          <div class="font-mono text-accent-400 text-sm shrink-0">Q1</div>
+          <div>
+            <div class="font-medium mb-1">Does your respond.io plan include API access and the Date &amp; Time step?</div>
+            <p class="text-sm text-slate-400">Both are needed. If not, I'll tell you the cheapest tier that has them before you commit.</p>
+          </div>
+        </div>
+        <div class="flex gap-4 bg-ink-900 border border-white/10 rounded-xl p-5">
+          <div class="font-mono text-accent-400 text-sm shrink-0">Q2</div>
+          <div>
+            <div class="font-medium mb-1">Google Sheet or SharePoint for the settings file?</div>
+            <p class="text-sm text-slate-400">Both work. Google Sheet is quicker and more reliable in Make, so I'd suggest it unless the owner strongly prefers SharePoint.</p>
+          </div>
+        </div>
+        <div class="flex gap-4 bg-ink-900 border border-white/10 rounded-xl p-5">
+          <div class="font-mono text-accent-400 text-sm shrink-0">Q3</div>
+          <div>
+            <div class="font-medium mb-1">New enquiries only, or returning contacts too?</div>
+            <p class="text-sm text-slate-400">Your brief says new enquiries. I'll gate on "no previous open conversation" unless you want returning customers handled as well.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- About -->
+  <section class="border-t border-white/5 py-20 md:py-28">
+    <div class="max-w-4xl mx-auto px-6">
+      <div class="grid md:grid-cols-3 gap-10 items-start">
+        <div>
+          <div class="text-xs uppercase tracking-[0.2em] text-accent-400 font-semibold mb-3">09 — Who's building it</div>
+          <h2 class="text-3xl font-bold tracking-tight">A short note on me</h2>
+        </div>
+        <div class="md:col-span-2 space-y-4 text-slate-300 leading-relaxed">
+          <p>
+            I'm Kristof. I build Make.com middleware for small businesses that want AI inside the tools they already
+            use, without anyone on the team having to open Make afterwards. My default pattern is exactly what your
+            brief describes: Make as the orchestration layer, Claude as the brain, and every setting the owner might
+            touch living in a spreadsheet.
+          </p>
+          <p>
+            I work directly with the Claude API, including prompt caching and multi-turn conversation history, which
+            is what keeps your Saturday run cost predictable. I write scenarios that fail to a human with a note,
+            never silently.
+          </p>
+          <p class="text-slate-400 italic">
+            Happy to walk you through a past build on a call before you commit.
+          </p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CTA -->
+  <section id="contact" class="border-t border-white/5 py-20 md:py-28 relative overflow-hidden">
+    <div class="absolute inset-0 glow"></div>
+    <div class="relative max-w-3xl mx-auto px-6 text-center">
+      <h2 class="text-3xl md:text-5xl font-bold tracking-tight">Ready to move forward?</h2>
+      <p class="mt-5 text-slate-400 text-lg">
+        Send the full spec, the bot instructions, and access to respond.io, Make, Anthropic and the SharePoint folder.
+        I'll come back inside 48 hours with the kickoff date and the first Saturday we can go live.
+      </p>
+      <div class="mt-10 flex flex-wrap items-center justify-center gap-3">
+        <a href="mailto:kristof@getflowtive.com" class="bg-accent-500 hover:bg-accent-400 text-ink-900 font-semibold px-6 py-3 rounded-lg transition">Email Kristof</a>
+        <a href="#milestones" class="border border-white/15 hover:bg-white/5 px-6 py-3 rounded-lg transition">Re-read the milestones</a>
+      </div>
+      <div class="mt-12 text-sm text-slate-500">
+        kristof@getflowtive.com · Proposal valid for 30 days
+      </div>
+    </div>
+  </section>
+
+  <footer class="border-t border-white/5 py-8">
+    <div class="max-w-6xl mx-auto px-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+      <div>© 2026 Flowtive · Prepared for your home-improvement team</div>
+      <div>Saturday WhatsApp Assistant Proposal</div>
+    </div>
+  </footer>
+
+</body>
+</html>
